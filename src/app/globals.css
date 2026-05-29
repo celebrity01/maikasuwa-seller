@@ -1,0 +1,795 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   KASUWA 2.0 — The Market That Listens
+   Immersive Night Market Design System
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  --radius: 0.75rem;
+
+  /* Night Market Core Colors */
+  --night-void: #06080C;
+  --night-sky: #0A0E14;
+  --night-deep: #0F1317;
+  --night-surface: #141A22;
+  --night-card: #1A2030;
+  --night-card-hover: #1E2638;
+
+  /* Ember & Lantern Palette */
+  --ember-orange: #FF9A3C;
+  --ember-amber: #FFB84D;
+  --lantern-gold: #FFD166;
+  --lantern-warm: #FFE4A0;
+  --fire-red: #E85D2C;
+  --fire-deep: #C4541D;
+
+  /* Market Accents */
+  --kente-green: #2D8F4E;
+  --kente-green-bright: #3DAF62;
+  --indigo-night: #4A3F8A;
+  --magenta-market: #C44B8C;
+
+  /* Text Hierarchy */
+  --text-lantern: #FFE4A0;
+  --text-ember: #FFB84D;
+  --text-smoke: #B8A898;
+  --text-ash: #7A6E62;
+  --text-shadow: #4A4238;
+
+  /* Surfaces */
+  --glass-dark: rgba(20, 26, 34, 0.75);
+  --glass-medium: rgba(20, 26, 34, 0.55);
+  --glass-light: rgba(20, 26, 34, 0.35);
+  --glow-ember: rgba(255, 154, 60, 0.15);
+  --glow-gold: rgba(255, 209, 102, 0.1);
+  --border-ember: rgba(255, 154, 60, 0.18);
+  --border-gold: rgba(255, 209, 102, 0.12);
+
+  /* Kente Stripe */
+  --kente-stripe: linear-gradient(
+    90deg,
+    #FF9A3C 0%, #FF9A3C 25%,
+    #FFD166 25%, #FFD166 50%,
+    #2D8F4E 50%, #2D8F4E 75%,
+    #C4541D 75%, #C4541D 100%
+  );
+
+  /* Standard theme vars */
+  --background: #06080C;
+  --foreground: #FFE4A0;
+  --card: #141A22;
+  --card-foreground: #FFE4A0;
+  --popover: #141A22;
+  --popover-foreground: #FFE4A0;
+  --primary: #FF9A3C;
+  --primary-foreground: #06080C;
+  --secondary: #1A2030;
+  --secondary-foreground: #FFB84D;
+  --muted: #1A2030;
+  --muted-foreground: #7A6E62;
+  --accent: #FFD166;
+  --accent-foreground: #06080C;
+  --destructive: #E04040;
+  --border: rgba(255, 154, 60, 0.18);
+  --input: rgba(255, 154, 60, 0.12);
+  --ring: #FF9A3C;
+  --chart-1: #FF9A3C;
+  --chart-2: #FFD166;
+  --chart-3: #2D8F4E;
+  --chart-4: #C4541D;
+  --chart-5: #4A3F8A;
+  --sidebar: #0A0E14;
+  --sidebar-foreground: #FFE4A0;
+  --sidebar-primary: #FF9A3C;
+  --sidebar-primary-foreground: #06080C;
+  --sidebar-accent: #1A2030;
+  --sidebar-accent-foreground: #FFB84D;
+  --sidebar-border: rgba(255, 154, 60, 0.18);
+  --sidebar-ring: #FF9A3C;
+}
+
+.dark {
+  --background: #06080C;
+  --foreground: #FFE4A0;
+  --card: #141A22;
+  --card-foreground: #FFE4A0;
+  --popover: #141A22;
+  --popover-foreground: #FFE4A0;
+  --primary: #FF9A3C;
+  --primary-foreground: #06080C;
+  --secondary: #1A2030;
+  --secondary-foreground: #FFB84D;
+  --muted: #1A2030;
+  --muted-foreground: #7A6E62;
+  --accent: #FFD166;
+  --accent-foreground: #06080C;
+  --destructive: #E04040;
+  --border: rgba(255, 154, 60, 0.18);
+  --input: rgba(255, 154, 60, 0.12);
+  --ring: #FF9A3C;
+  --chart-1: #FF9A3C;
+  --chart-2: #FFD166;
+  --chart-3: #2D8F4E;
+  --chart-4: #C4541D;
+  --chart-5: #4A3F8A;
+  --sidebar: #0A0E14;
+  --sidebar-foreground: #FFE4A0;
+  --sidebar-primary: #FF9A3C;
+  --sidebar-primary-foreground: #06080C;
+  --sidebar-accent: #1A2030;
+  --sidebar-accent-foreground: #FFB84D;
+  --sidebar-border: rgba(255, 154, 60, 0.18);
+  --sidebar-ring: #FF9A3C;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    -webkit-tap-highlight-color: transparent;
+  }
+  html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: auto;
+    overscroll-behavior: contain;
+    height: 100dvh;
+  }
+  body {
+    @apply bg-background text-foreground;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    overscroll-behavior: contain;
+  }
+  button, a, [role="button"], input, select, textarea {
+    touch-action: manipulation;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   NIGHT MARKET BACKGROUND — Immersive dark ambient
+   ═══════════════════════════════════════════════════════════════════ */
+
+.night-market-bg {
+  background:
+    radial-gradient(ellipse at 70% 10%, rgba(255, 154, 60, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 30% 90%, rgba(255, 209, 102, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(45, 143, 78, 0.03) 0%, transparent 60%),
+    var(--night-void);
+  min-height: 100dvh;
+  position: relative;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   FLOATING EMBERS — Animated particles
+   ═══════════════════════════════════════════════════════════════════ */
+
+@keyframes ember-float {
+  0% {
+    transform: translateY(100vh) translateX(0) scale(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+    transform: translateY(90vh) translateX(5px) scale(1);
+  }
+  90% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(-10vh) translateX(-10px) scale(0.3);
+    opacity: 0;
+  }
+}
+
+@keyframes ember-float-alt {
+  0% {
+    transform: translateY(100vh) translateX(0) scale(0);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.8;
+    transform: translateY(85vh) translateX(-8px) scale(1);
+  }
+  85% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateY(-5vh) translateX(12px) scale(0.2);
+    opacity: 0;
+  }
+}
+
+.ember-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.ember-particle-1 {
+  background: var(--ember-orange);
+  box-shadow: 0 0 6px var(--ember-orange), 0 0 12px rgba(255, 154, 60, 0.3);
+  animation: ember-float 8s ease-in-out infinite;
+  left: 15%;
+}
+
+.ember-particle-2 {
+  background: var(--lantern-gold);
+  box-shadow: 0 0 6px var(--lantern-gold), 0 0 12px rgba(255, 209, 102, 0.3);
+  animation: ember-float-alt 10s ease-in-out infinite;
+  left: 45%;
+  animation-delay: -2s;
+}
+
+.ember-particle-3 {
+  background: var(--ember-amber);
+  box-shadow: 0 0 6px var(--ember-amber), 0 0 12px rgba(255, 184, 77, 0.3);
+  animation: ember-float 12s ease-in-out infinite;
+  left: 75%;
+  animation-delay: -4s;
+}
+
+.ember-particle-4 {
+  background: var(--fire-red);
+  box-shadow: 0 0 6px var(--fire-red), 0 0 12px rgba(232, 93, 44, 0.3);
+  animation: ember-float-alt 9s ease-in-out infinite;
+  left: 60%;
+  animation-delay: -6s;
+}
+
+.ember-particle-5 {
+  background: var(--lantern-warm);
+  box-shadow: 0 0 6px var(--lantern-warm), 0 0 12px rgba(255, 228, 160, 0.3);
+  animation: ember-float 11s ease-in-out infinite;
+  left: 30%;
+  animation-delay: -3s;
+}
+
+.ember-particle-6 {
+  background: var(--ember-orange);
+  box-shadow: 0 0 6px var(--ember-orange), 0 0 12px rgba(255, 154, 60, 0.2);
+  animation: ember-float-alt 14s ease-in-out infinite;
+  left: 85%;
+  animation-delay: -7s;
+}
+
+.ember-particle-7 {
+  background: var(--lantern-gold);
+  box-shadow: 0 0 4px var(--lantern-gold), 0 0 8px rgba(255, 209, 102, 0.2);
+  animation: ember-float 15s ease-in-out infinite;
+  left: 5%;
+  animation-delay: -5s;
+  width: 3px;
+  height: 3px;
+}
+
+.ember-particle-8 {
+  background: var(--ember-amber);
+  box-shadow: 0 0 4px var(--ember-amber), 0 0 8px rgba(255, 184, 77, 0.2);
+  animation: ember-float-alt 13s ease-in-out infinite;
+  left: 50%;
+  animation-delay: -8s;
+  width: 3px;
+  height: 3px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   LANTERN GLOW — Warm ambient light sources
+   ═══════════════════════════════════════════════════════════════════ */
+
+@keyframes lantern-pulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+.lantern-glow {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(60px);
+}
+
+.lantern-glow-1 {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(255, 154, 60, 0.12) 0%, transparent 70%);
+  top: 5%;
+  right: 10%;
+  animation: lantern-pulse 6s ease-in-out infinite;
+}
+
+.lantern-glow-2 {
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(circle, rgba(255, 209, 102, 0.08) 0%, transparent 70%);
+  bottom: 20%;
+  left: 5%;
+  animation: lantern-pulse 8s ease-in-out infinite;
+  animation-delay: -3s;
+}
+
+.lantern-glow-3 {
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(255, 184, 77, 0.06) 0%, transparent 70%);
+  top: 40%;
+  right: 30%;
+  animation: lantern-pulse 10s ease-in-out infinite;
+  animation-delay: -5s;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   CHAT MESSAGES — Night market style
+   ═══════════════════════════════════════════════════════════════════ */
+
+@keyframes message-appear {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chat-message {
+  animation: message-appear 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.mai-message {
+  background: linear-gradient(135deg, rgba(255, 154, 60, 0.12), rgba(255, 209, 102, 0.06));
+  border: 1px solid rgba(255, 154, 60, 0.15);
+  border-radius: 20px 20px 20px 4px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.user-message {
+  background: linear-gradient(135deg, rgba(45, 143, 78, 0.15), rgba(45, 143, 78, 0.05));
+  border: 1px solid rgba(45, 143, 78, 0.15);
+  border-radius: 20px 20px 4px 20px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.system-message {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PRODUCT CARD — Glowing card within conversation
+   ═══════════════════════════════════════════════════════════════════ */
+
+@keyframes card-glow {
+  0%, 100% {
+    box-shadow:
+      0 0 20px rgba(255, 154, 60, 0.1),
+      0 4px 24px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 209, 102, 0.05);
+  }
+  50% {
+    box-shadow:
+      0 0 30px rgba(255, 154, 60, 0.15),
+      0 4px 24px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 209, 102, 0.08);
+  }
+}
+
+.product-glow-card {
+  background: linear-gradient(160deg, rgba(26, 32, 48, 0.9), rgba(20, 26, 34, 0.95));
+  border: 1px solid rgba(255, 154, 60, 0.2);
+  border-radius: 16px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  overflow: hidden;
+  position: relative;
+  animation: card-glow 4s ease-in-out infinite, message-appear 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.product-glow-card:hover {
+  border-color: rgba(255, 154, 60, 0.4);
+  transform: translateY(-2px);
+}
+
+.product-glow-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--kente-stripe);
+  background-size: 100% 100%;
+  image-rendering: crisp-edges;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   CHAT INPUT — Night market input bar
+   ═══════════════════════════════════════════════════════════════════ */
+
+.chat-input-container {
+  background: linear-gradient(to top, rgba(6, 8, 12, 0.98), rgba(6, 8, 12, 0.9));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 154, 60, 0.1);
+}
+
+.chat-input-box {
+  background: rgba(20, 26, 34, 0.8);
+  border: 1.5px solid rgba(255, 154, 60, 0.15);
+  border-radius: 24px;
+  color: var(--text-lantern);
+  transition: all 0.2s ease;
+}
+
+.chat-input-box:focus-within {
+  border-color: rgba(255, 154, 60, 0.4);
+  box-shadow: 0 0 0 3px rgba(255, 154, 60, 0.08);
+  background: rgba(20, 26, 34, 0.9);
+}
+
+.chat-input-box::placeholder {
+  color: var(--text-ash);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   HAGGLE BUBBLE — Price negotiation
+   ═══════════════════════════════════════════════════════════════════ */
+
+.haggle-bubble {
+  background: linear-gradient(135deg, rgba(74, 63, 138, 0.15), rgba(196, 75, 140, 0.08));
+  border: 1px solid rgba(74, 63, 138, 0.2);
+  border-radius: 16px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   COMMUNITY CIRCLE — Group buying
+   ═══════════════════════════════════════════════════════════════════ */
+
+.circle-bubble {
+  background: linear-gradient(135deg, rgba(45, 143, 78, 0.12), rgba(61, 175, 98, 0.06));
+  border: 1px solid rgba(45, 143, 78, 0.2);
+  border-radius: 16px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   TYPING INDICATOR — Mai Kasuwa thinking
+   ═══════════════════════════════════════════════════════════════════ */
+
+@keyframes typing-dot {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-6px); opacity: 1; }
+}
+
+.typing-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ember-orange);
+  display: inline-block;
+  animation: typing-dot 1.4s ease-in-out infinite;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: 0.15s;
+  background: var(--lantern-gold);
+}
+
+.typing-dot:nth-child(3) {
+  animation-delay: 0.3s;
+  background: var(--ember-amber);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   KENTE STRIPE — Reusable divider
+   ═══════════════════════════════════════════════════════════════════ */
+
+.kente-stripe {
+  height: 3px;
+  width: 100%;
+  background: var(--kente-stripe);
+  background-size: 100% 100%;
+  image-rendering: crisp-edges;
+  border-radius: 0;
+  flex-shrink: 0;
+  contain: layout style;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SCROLLBAR — Custom thin scrollbar
+   ═══════════════════════════════════════════════════════════════════ */
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 154, 60, 0.15);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 154, 60, 0.3);
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   BUTTONS — Night market buttons
+   ═══════════════════════════════════════════════════════════════════ */
+
+.btn-ember {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #06080C;
+  background: linear-gradient(135deg, #FF9A3C, #FFD166);
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-ember:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 4px 16px rgba(255, 154, 60, 0.3);
+}
+
+.btn-ember:active {
+  transform: scale(0.97);
+  filter: brightness(0.95);
+}
+
+.btn-ghost-night {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-ember);
+  background: rgba(255, 154, 60, 0.08);
+  border: 1px solid rgba(255, 154, 60, 0.15);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.btn-ghost-night:hover {
+  background: rgba(255, 154, 60, 0.15);
+  border-color: rgba(255, 154, 60, 0.3);
+}
+
+.btn-ghost-night:active {
+  transform: scale(0.97);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   AUTH SCREEN — Night market login/signup
+   ═══════════════════════════════════════════════════════════════════ */
+
+.auth-input {
+  background: rgba(20, 26, 34, 0.8) !important;
+  border: 1.5px solid rgba(255, 154, 60, 0.15) !important;
+  color: var(--text-lantern) !important;
+  border-radius: 12px !important;
+  font-size: 1rem !important;
+  min-height: 48px !important;
+  padding-left: 16px !important;
+  padding-right: 16px !important;
+  transition: all 0.2s ease !important;
+}
+
+.auth-input:focus {
+  border-color: rgba(255, 154, 60, 0.4) !important;
+  box-shadow: 0 0 0 3px rgba(255, 154, 60, 0.08) !important;
+  background: rgba(20, 26, 34, 0.9) !important;
+}
+
+.auth-input::placeholder {
+  color: var(--text-ash) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SELLER CTA BANNER — Bottom link for seller registration
+   ═══════════════════════════════════════════════════════════════════ */
+
+.seller-cta-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  margin: 8px 16px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(255, 154, 60, 0.08), rgba(255, 209, 102, 0.04));
+  border: 1px solid rgba(255, 154, 60, 0.15);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  position: relative;
+  z-index: 10;
+  overflow: hidden;
+}
+
+.seller-cta-banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 154, 60, 0.03), transparent);
+  animation: seller-cta-shimmer 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes seller-cta-shimmer {
+  0%, 100% { transform: translateX(-100%); }
+  50% { transform: translateX(100%); }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SELLER REGISTRATION PAGE — KYB Form Styles
+   ═══════════════════════════════════════════════════════════════════ */
+
+.kyb-step-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 800;
+  transition: all 0.3s ease;
+}
+
+.kyb-step-indicator.active {
+  background: linear-gradient(135deg, var(--ember-orange), var(--lantern-gold));
+  color: var(--night-void);
+  box-shadow: 0 0 16px rgba(255, 154, 60, 0.25);
+}
+
+.kyb-step-indicator.completed {
+  background: linear-gradient(135deg, var(--kente-green), var(--kente-green-bright));
+  color: var(--night-void);
+}
+
+.kyb-step-indicator.inactive {
+  background: var(--night-card);
+  color: var(--text-ash);
+  border: 1px solid var(--border-ember);
+}
+
+.photo-upload-area {
+  border: 2px dashed rgba(255, 154, 60, 0.2);
+  border-radius: 16px;
+  padding: 32px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: rgba(255, 154, 60, 0.02);
+}
+
+.photo-upload-area:hover {
+  border-color: rgba(255, 154, 60, 0.4);
+  background: rgba(255, 154, 60, 0.05);
+}
+
+.photo-upload-area.has-image {
+  border-style: solid;
+  border-color: var(--ember-orange);
+  padding: 12px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PRODUCT DETAIL PANEL — Full-screen slide-up detail view
+   ═══════════════════════════════════════════════════════════════════ */
+
+@keyframes detail-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   REDUCED MOTION
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  .ember-particle,
+  .lantern-glow,
+  .typing-dot,
+  .product-glow-card {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+  }
+  .ember-particle {
+    display: none;
+  }
+  * {
+    transition-duration: 0.01ms !important;
+  }
+}
