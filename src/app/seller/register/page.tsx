@@ -201,11 +201,11 @@ export default function SellerRegisterPage() {
             You will receive a confirmation email at <strong className="text-[var(--text-ember)]">{email}</strong> once your account is approved.
           </p>
           <Link
-            href="/"
+            href="/seller/login"
             className="btn-ember inline-flex items-center gap-2"
           >
             <ArrowLeft className="size-4" />
-            Return to the Market
+            Go to Seller Login
           </Link>
         </motion.div>
       </div>
@@ -224,7 +224,7 @@ export default function SellerRegisterPage() {
       {/* ── Header ── */}
       <header className="relative z-10 px-4 py-4 flex items-center gap-3 border-b border-[var(--border-ember)] bg-[rgba(6,8,12,0.8)] backdrop-blur-xl">
         <Link
-          href="/"
+          href="/seller/login"
           className="w-10 h-10 rounded-full bg-[var(--night-card)] flex items-center justify-center hover:bg-[var(--night-card-hover)] transition-colors border border-[var(--border-ember)]"
         >
           <ArrowLeft className="size-4 text-[var(--text-ash)]" />
