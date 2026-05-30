@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Send,
@@ -29,8 +29,11 @@ import {
   Users,
   Tag,
   Sparkles,
+  CheckCircle2,
+  MailCheck,
 } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   formatPrice,
   PRODUCTS,
@@ -580,9 +583,26 @@ function ProductDetailPanel({
   );
 }
 
-// ── Main Component ──
+// ── Main Component (with Suspense for useSearchParams) ──
 
-export default function KasuwaMarket() {
+export default function KasuwaMarketPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="night-market-bg h-[100dvh] flex items-center justify-center">
+          <div className="lantern-glow lantern-glow-1" />
+          <div className="lantern-glow lantern-glow-2" />
+          <div className="text-4xl animate-pulse">🏮</div>
+        </div>
+      }
+    >
+      <KasuwaMarket />
+    </Suspense>
+  );
+}
+
+function KasuwaMarket() {
+  const searchParams = useSearchParams();
   const [categories] = useState<CategoryChat[]>(buildCategoryChats);
   const [activeCategory, setActiveCategory] = useState<CategoryChat | null>(null);
   const [chatMessages, setChatMessages] = useState<Record<string, ChatMessage[]>>({});
@@ -592,8 +612,33 @@ export default function KasuwaMarket() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<ProductCardData | null>(null);
 
+  // ── Email confirmation state ──
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // ── Check for email confirmation / auth error on mount ──
+  useEffect(() => {
+    const confirmed = searchParams.get("confirmed");
+    const errorParam = searchParams.get("auth_error");
+    if (confirmed === "true") {
+      setShowConfirmation(true);
+      // Clean up URL without reloading the page
+      const url = new URL(window.location.href);
+      url.searchParams.delete("confirmed");
+      url.searchParams.delete("auth_error");
+      window.history.replaceState({}, "", url.pathname);
+    } else if (errorParam) {
+      setAuthError(decodeURIComponent(errorParam));
+      // Clean up URL
+      const url = new URL(window.location.href);
+      url.searchParams.delete("auth_error");
+      url.searchParams.delete("confirmed");
+      window.history.replaceState({}, "", url.pathname);
+    }
+  }, [searchParams]);
 
   // ── Auto-scroll ──
   useEffect(() => {
@@ -1055,6 +1100,123 @@ export default function KasuwaMarket() {
             product={selectedProduct}
             onClose={() => setSelectedProduct(null)}
           />
+        )}
+      </AnimatePresence>
+
+      {/* ── Email Confirmation Welcome Modal ── */}
+      <AnimatePresence>
+        {showConfirmation && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-[400] flex items-center justify-center p-4 bg-[rgba(6,8,12,0.85)] backdrop-blur-md"
+            onClick={() => setShowConfirmation(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.85, y: 30 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.85, y: 30 }}
+              transition={{ type: "spring", damping: 25, stiffness: 220 }}
+              className="w-full max-w-sm bg-[var(--night-surface)] border border-[var(--border-ember)] rounded-2xl overflow-hidden shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Kente stripe top */}
+              <div className="kente-stripe" />
+
+              <div className="p-6 text-center">
+                {/* Success icon */}
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", damping: 12, stiffness: 180, delay: 0.15 }}
+                  className="w-20 h-20 rounded-full bg-[rgba(45,143,78,0.15)] border border-[rgba(45,143,78,0.3)] flex items-center justify-center mx-auto mb-5"
+                >
+                  <CheckCircle2 className="size-10 text-[var(--kente-green-bright)]" />
+                </motion.div>
+
+                <h2 className="text-xl font-black text-[var(--text-lantern)] mb-2">
+                  Email Confirmed!
+                </h2>
+
+                <div className="flex items-center justify-center gap-2 mb-4">
+                  <MailCheck className="size-4 text-[var(--kente-green-bright)]" />
+                  <span className="text-sm text-[var(--text-smoke)]">
+                    You have successfully confirmed your email
+                  </span>
+                </div>
+
+                <div className="bg-[rgba(255,154,60,0.06)] border border-[rgba(255,154,60,0.12)] rounded-xl p-4 mb-5">
+                  <p className="text-sm text-[var(--text-smoke)] leading-relaxed">
+                    Please wait for admin approval. Once approved, you will be able to
+                    log in and start uploading your products to the marketplace.
+                  </p>
+                  <p className="text-xs text-[var(--text-ash)] mt-2">
+                    You will receive an email notification when your account is approved. Thank you!
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => setShowConfirmation(false)}
+                  className="btn-ember w-full"
+                >
+                  Browse the Market
+                </button>
+              </div>
+
+              {/* Kente stripe bottom */}
+              <div className="kente-stripe" />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Auth Error Modal ── */}
+      <AnimatePresence>
+        {authError && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-[400] flex items-center justify-center p-4 bg-[rgba(6,8,12,0.85)] backdrop-blur-md"
+            onClick={() => setAuthError(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.85, y: 30 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.85, y: 30 }}
+              transition={{ type: "spring", damping: 25, stiffness: 220 }}
+              className="w-full max-w-sm bg-[var(--night-surface)] border border-[rgba(232,93,44,0.3)] rounded-2xl overflow-hidden shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="kente-stripe" />
+
+              <div className="p-6 text-center">
+                <div className="w-16 h-16 rounded-full bg-[rgba(232,93,44,0.12)] border border-[rgba(232,93,44,0.25)] flex items-center justify-center mx-auto mb-4">
+                  <X className="size-8 text-[var(--fire-red)]" />
+                </div>
+
+                <h2 className="text-lg font-black text-[var(--fire-red)] mb-2">
+                  Confirmation Failed
+                </h2>
+
+                <p className="text-sm text-[var(--text-smoke)] mb-5">
+                  {authError}
+                </p>
+
+                <button
+                  onClick={() => setAuthError(null)}
+                  className="btn-ghost-night w-full"
+                >
+                  Dismiss
+                </button>
+              </div>
+
+              <div className="kente-stripe" />
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

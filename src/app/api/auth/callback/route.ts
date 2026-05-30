@@ -16,14 +16,21 @@ export async function GET(request: NextRequest) {
           `${requestUrl.origin}?auth_error=${encodeURIComponent(error.message)}`
         );
       }
-    }
 
-    if (token) {
+      // PKCE flow success — redirect to home with confirmation flag
       return NextResponse.redirect(
-        `${requestUrl.origin}?confirmed=true&token=${encodeURIComponent(token)}`
+        `${requestUrl.origin}?confirmed=true`
       );
     }
 
+    if (token) {
+      // Implicit flow success — redirect to home with confirmation flag
+      return NextResponse.redirect(
+        `${requestUrl.origin}?confirmed=true`
+      );
+    }
+
+    // No code or token — just redirect home
     return NextResponse.redirect(requestUrl.origin);
   } catch (error) {
     console.error('[Auth Callback] Error:', error);
