@@ -40,7 +40,7 @@ export default function SellerLoginPage() {
       // 2. Check seller profile status
       const { data: profile, error: profileError } = await supabase
         .from("seller_profiles")
-        .select("id, shop_name, owner_name, is_disabled, status")
+        .select("id, shop_name, full_name, is_disabled, status")
         .eq("id", authData.user.id)
         .single();
 
@@ -74,7 +74,7 @@ export default function SellerLoginPage() {
         profile.shop_name || ""
       )}; path=/; max-age=86400; SameSite=Lax`;
       document.cookie = `seller_name=${encodeURIComponent(
-        profile.owner_name || ""
+        profile.full_name || ""
       )}; path=/; max-age=86400; SameSite=Lax`;
 
       toast.success("Welcome back to KASUWA!");

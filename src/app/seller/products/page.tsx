@@ -30,7 +30,7 @@ interface Product {
 
 interface SellerInfo {
   shopName: string;
-  ownerName: string;
+  fullName: string;
 }
 
 const CATEGORIES = [
@@ -84,12 +84,12 @@ export default function SellerProductsPage() {
       // Get profile
       const { data: profile } = await supabase
         .from("seller_profiles")
-        .select("shop_name, owner_name")
+        .select("shop_name, full_name")
         .eq("id", session.user.id)
         .single();
 
       if (profile) {
-        setSeller({ shopName: profile.shop_name, ownerName: profile.owner_name });
+        setSeller({ shopName: profile.shop_name, fullName: profile.full_name });
       }
 
       // Get products
@@ -289,7 +289,7 @@ export default function SellerProductsPage() {
 
   return (
     <div className="night-market-bg min-h-screen">
-      <Sidebar sellerName={seller?.ownerName || ""} shopName={seller?.shopName || ""} />
+      <Sidebar sellerName={seller?.fullName || ""} shopName={seller?.shopName || ""} />
 
       <main className="ml-64 p-8">
         {/* Header */}

@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     // Check seller profile
     const { data: profile, error: profileError } = await supabase
       .from("seller_profiles")
-      .select("id, shop_name, owner_name, is_disabled, status, default_password_set")
+      .select("id, shop_name, full_name, is_disabled, status, default_password_set")
       .eq("id", authData.user.id)
       .single();
 
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
       },
       profile: {
         shop_name: profile.shop_name,
-        owner_name: profile.owner_name,
+        full_name: profile.full_name,
         default_password_set: profile.default_password_set,
       },
       session: authData.session,

@@ -16,7 +16,7 @@ import { toast } from "sonner";
 
 interface SellerInfo {
   shopName: string;
-  ownerName: string;
+  fullName: string;
   email: string;
   isDisabled: boolean;
   defaultPasswordSet: boolean;
@@ -52,14 +52,14 @@ export default function SellerSettingsPage() {
 
       const { data: profile } = await supabase
         .from("seller_profiles")
-        .select("shop_name, owner_name, is_disabled, default_password_set")
+        .select("shop_name, full_name, is_disabled, default_password_set")
         .eq("id", session.user.id)
         .single();
 
       if (profile) {
         setSeller({
           shopName: profile.shop_name || "",
-          ownerName: profile.owner_name || "",
+          fullName: profile.full_name || "",
           email: session.user.email || "",
           isDisabled: profile.is_disabled || false,
           defaultPasswordSet: profile.default_password_set || false,
@@ -125,7 +125,7 @@ export default function SellerSettingsPage() {
   return (
     <div className="night-market-bg min-h-screen">
       <Sidebar
-        sellerName={seller?.ownerName || ""}
+        sellerName={seller?.fullName || ""}
         shopName={seller?.shopName || ""}
       />
 
@@ -168,7 +168,7 @@ export default function SellerSettingsPage() {
                 Owner Name
               </label>
               <p className="text-sm text-[#FFE4A0] font-semibold">
-                {seller?.ownerName || "Not set"}
+                {seller?.fullName || "Not set"}
               </p>
             </div>
             <div>

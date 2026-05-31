@@ -15,7 +15,7 @@ import {
 
 interface SellerData {
   shopName: string;
-  ownerName: string;
+  fullName: string;
   isDisabled: boolean;
 }
 
@@ -65,7 +65,7 @@ export default function SellerDashboardPage() {
       // Get seller profile
       const { data: profile } = await supabase
         .from("seller_profiles")
-        .select("shop_name, owner_name, is_disabled")
+        .select("shop_name, full_name, is_disabled")
         .eq("id", session.user.id)
         .single();
 
@@ -76,7 +76,7 @@ export default function SellerDashboardPage() {
 
       setSeller({
         shopName: profile.shop_name || "",
-        ownerName: profile.owner_name || "",
+        fullName: profile.full_name || "",
         isDisabled: profile.is_disabled || false,
       });
 
@@ -122,7 +122,7 @@ export default function SellerDashboardPage() {
 
   return (
     <div className="night-market-bg min-h-screen">
-      <Sidebar sellerName={seller.ownerName} shopName={seller.shopName} />
+      <Sidebar sellerName={seller.fullName} shopName={seller.shopName} />
 
       {/* Main content */}
       <main className="ml-64 p-8">
@@ -139,7 +139,7 @@ export default function SellerDashboardPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl font-black text-[#FFE4A0]">
-            Welcome back, {seller.ownerName?.split(" ")[0] || "Seller"}!
+            Welcome back, {seller.fullName?.split(" ")[0] || "Seller"}!
           </h1>
           <p className="text-[#7A6E62] mt-1">
             Here&apos;s what&apos;s happening with your shop today
