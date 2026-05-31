@@ -44,11 +44,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Clear default_password_set flag
+    // Clear default_password_set flag — lookup by user_id (FK to auth.users)
     await supabase
       .from("seller_profiles")
       .update({ default_password_set: false })
-      .eq("id", user.id);
+      .eq("user_id", user.id);
 
     return NextResponse.json({ success: true, message: "Password updated" });
   } catch (err) {

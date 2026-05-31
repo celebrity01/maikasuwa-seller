@@ -31,11 +31,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check seller profile
+    // Check seller profile — lookup by user_id (FK to auth.users), not by id (PK)
     const { data: profile, error: profileError } = await supabase
       .from("seller_profiles")
       .select("id, shop_name, full_name, is_disabled, status, default_password_set")
-      .eq("id", authData.user.id)
+      .eq("user_id", authData.user.id)
       .single();
 
     if (profileError || !profile) {
