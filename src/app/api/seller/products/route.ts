@@ -1,247 +1,210 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@/lib/supabase';
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 
-// GET /api/seller/products — Fetch products for the authenticated seller
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+function getAuth(request: NextRequest) {
+  const authHeader = request.headers.get("authorization");
+  if (!authHeader?.startsWith("Bearer ")) return null;
+  return authHeader.split(" ")[1];
+}
+
+// GET /api/seller/products — List products for the authenticated seller
 export async function GET(request: NextRequest) {
   try {
-    const authHeader = request.headers.get('authorization');
-    const token = authHeader?.replace('Bearer ', '');
+    const token = getAuth(request);
     if (!token) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const client = createServerClient();
-    const { data: { user }, error: authError } = await client.auth.getUser(token);
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: `Bearer ${token}` } },
+    });
 
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Find seller profile
-    const { data: seller, error: sellerError } = await client
-      .from('seller_profiles')
-      .select('id, is_disabled')
-      .eq('user_id', user.id)
-      .single();
+    const { data: products, error } = await supabase
+      .from("products")
+      .select("*")
+      .eq("seller_id", user.id)
+      .order("created_at", { ascending: false });
 
-    if (sellerError || !seller) {
-      return NextResponse.json({ error: 'Seller profile not found' }, { status: 404 });
-    }
+    if (error) throw error;
 
-    if (seller.is_disabled) {
-      return NextResponse.json({ error: 'Account is disabled' }, { status: 403 });
-    }
-
-    // Fetch products
-    const { data: products, error: productsError } = await client
-      .from('products')
-      .select('*')
-      .eq('seller_id', seller.id)
-      .order('created_at', { ascending: false });
-
-    if (productsError) {
-      return NextResponse.json({ error: productsError.message }, { status: 400 });
-    }
-
-    return NextResponse.json({ products: products || [] });
-  } catch (error) {
-    console.error('[Seller Products GET] Error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ products });
+  } catch (err) {
+    console.error("GET products error:", err);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
 
 // POST /api/seller/products — Create a new product
 export async function POST(request: NextRequest) {
   try {
-    const authHeader = request.headers.get('authorization');
-    const token = authHeader?.replace('Bearer ', '');
+    const token = getAuth(request);
     if (!token) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const client = createServerClient();
-    const { data: { user }, error: authError } = await client.auth.getUser(token);
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: `Bearer ${token}` } },
+    });
 
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    // Find seller profile
-    const { data: seller, error: sellerError } = await client
-      .from('seller_profiles')
-      .select('id, is_disabled, shop_name')
-      .eq('user_id', user.id)
-      .single();
-
-    if (sellerError || !seller) {
-      return NextResponse.json({ error: 'Seller profile not found' }, { status: 404 });
-    }
-
-    if (seller.is_disabled) {
-      return NextResponse.json({ error: 'Account is disabled' }, { status: 403 });
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await request.json();
-    const { name, category, subcategory, price, condition, state, description, specs, negotiable, haggle_min, haggle_max, image_urls } = body;
+    const { name, description, price, category, image_url } = body;
 
-    if (!name || !category || !price || !state) {
-      return NextResponse.json({ error: 'Name, category, price, and state are required' }, { status: 400 });
+    if (!name || !price) {
+      return NextResponse.json(
+        { error: "Name and price are required" },
+        { status: 400 }
+      );
     }
 
-    const { data: product, error: insertError } = await client
-      .from('products')
+    const { data: product, error } = await supabase
+      .from("products")
       .insert({
-        seller_id: seller.id,
         name,
-        category,
-        subcategory: subcategory || '',
-        price: Number(price),
-        currency: 'NGN',
-        condition: condition || 'new',
-        state,
-        description: description || '',
-        specs: specs || {},
-        negotiable: negotiable || false,
-        haggle_min: haggle_min ? Number(haggle_min) : null,
-        haggle_max: haggle_max ? Number(haggle_max) : null,
-        image_urls: image_urls || [],
-        status: 'active',
-        views: 0,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+        description: description || null,
+        price: parseFloat(price),
+        category: category || null,
+        image_url: image_url || null,
+        seller_id: user.id,
       })
       .select()
       .single();
 
-    if (insertError) {
-      return NextResponse.json({ error: insertError.message }, { status: 400 });
-    }
+    if (error) throw error;
 
-    return NextResponse.json({ product });
-  } catch (error) {
-    console.error('[Seller Products POST] Error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ product }, { status: 201 });
+  } catch (err) {
+    console.error("POST product error:", err);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
 
 // PATCH /api/seller/products — Update a product
 export async function PATCH(request: NextRequest) {
   try {
-    const authHeader = request.headers.get('authorization');
-    const token = authHeader?.replace('Bearer ', '');
+    const token = getAuth(request);
     if (!token) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const client = createServerClient();
-    const { data: { user }, error: authError } = await client.auth.getUser(token);
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: `Bearer ${token}` } },
+    });
 
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    const { data: seller } = await client
-      .from('seller_profiles')
-      .select('id, is_disabled')
-      .eq('user_id', user.id)
-      .single();
-
-    if (!seller || seller.is_disabled) {
-      return NextResponse.json({ error: 'Unauthorized or disabled' }, { status: 403 });
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await request.json();
-    const { id, ...updates } = body;
+    const { id, name, description, price, category, image_url, is_paused } = body;
 
     if (!id) {
-      return NextResponse.json({ error: 'Product ID is required' }, { status: 400 });
+      return NextResponse.json(
+        { error: "Product ID is required" },
+        { status: 400 }
+      );
     }
 
-    // Verify the product belongs to this seller
-    const { data: existing } = await client
-      .from('products')
-      .select('seller_id')
-      .eq('id', id)
-      .single();
+    const updateData: Record<string, unknown> = {};
+    if (name !== undefined) updateData.name = name;
+    if (description !== undefined) updateData.description = description;
+    if (price !== undefined) updateData.price = parseFloat(price);
+    if (category !== undefined) updateData.category = category;
+    if (image_url !== undefined) updateData.image_url = image_url;
+    if (is_paused !== undefined) updateData.is_paused = is_paused;
 
-    if (!existing || existing.seller_id !== seller.id) {
-      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
-    }
-
-    const { data: product, error: updateError } = await client
-      .from('products')
-      .update({ ...updates, updated_at: new Date().toISOString() })
-      .eq('id', id)
+    const { data: product, error } = await supabase
+      .from("products")
+      .update(updateData)
+      .eq("id", id)
+      .eq("seller_id", user.id)
       .select()
       .single();
 
-    if (updateError) {
-      return NextResponse.json({ error: updateError.message }, { status: 400 });
-    }
+    if (error) throw error;
 
     return NextResponse.json({ product });
-  } catch (error) {
-    console.error('[Seller Products PATCH] Error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  } catch (err) {
+    console.error("PATCH product error:", err);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
 
 // DELETE /api/seller/products — Delete a product
 export async function DELETE(request: NextRequest) {
   try {
-    const authHeader = request.headers.get('authorization');
-    const token = authHeader?.replace('Bearer ', '');
+    const token = getAuth(request);
     if (!token) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const client = createServerClient();
-    const { data: { user }, error: authError } = await client.auth.getUser(token);
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: `Bearer ${token}` } },
+    });
 
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    const { data: seller } = await client
-      .from('seller_profiles')
-      .select('id, is_disabled')
-      .eq('user_id', user.id)
-      .single();
-
-    if (!seller || seller.is_disabled) {
-      return NextResponse.json({ error: 'Unauthorized or disabled' }, { status: 403 });
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
-    const productId = searchParams.get('id');
+    const id = searchParams.get("id");
 
-    if (!productId) {
-      return NextResponse.json({ error: 'Product ID is required' }, { status: 400 });
+    if (!id) {
+      return NextResponse.json(
+        { error: "Product ID is required" },
+        { status: 400 }
+      );
     }
 
-    // Verify ownership
-    const { data: existing } = await client
-      .from('products')
-      .select('seller_id')
-      .eq('id', productId)
-      .single();
-
-    if (!existing || existing.seller_id !== seller.id) {
-      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
-    }
-
-    const { error: deleteError } = await client
-      .from('products')
+    const { error } = await supabase
+      .from("products")
       .delete()
-      .eq('id', productId);
+      .eq("id", id)
+      .eq("seller_id", user.id);
 
-    if (deleteError) {
-      return NextResponse.json({ error: deleteError.message }, { status: 400 });
-    }
+    if (error) throw error;
 
-    return NextResponse.json({ message: 'Product deleted successfully' });
-  } catch (error) {
-    console.error('[Seller Products DELETE] Error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("DELETE product error:", err);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

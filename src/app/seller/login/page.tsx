@@ -1,150 +1,203 @@
 "use client";
 
-import React, { useState } from "react";
-import { motion } from "framer-motion";
-import { ShieldCheck, Eye, EyeOff, Lock, Mail, AlertCircle } from "lucide-react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { supabase } from "@/lib/supabase";
+import { Store, Eye, EyeOff, AlertCircle, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
-export default function SellerLogin() {
+export default function SellerLoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const [error, setError] = useState("");
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
     setLoading(true);
+    setError("");
 
     try {
-      const res = await fetch("/api/seller/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+      // 1. Authenticate with Supabase Auth
+      const { data: authData, error: authError } =
+        await supabase.auth.signInWithPassword({
+          email: email.trim().toLowerCase(),
+          password,
+        });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || "Login failed");
+      if (authError) {
+        setError("Invalid email or password. Please try again.");
         return;
       }
 
-      // Store seller session
-      localStorage.setItem("kasuwa_seller", JSON.stringify({
-        seller: data.seller,
-        accessToken: data.session?.access_token,
-      }));
-
-      // If using default password, force change
-      if (data.seller.default_password_set) {
-        router.push("/seller/settings?force=true");
-      } else {
-        router.push("/seller/dashboard");
+      if (!authData.user) {
+        setError("Authentication failed. Please try again.");
+        return;
       }
-    } catch {
-      setError("Connection error. Please try again.");
+
+      // 2. Check seller profile status
+      const { data: profile, error: profileError } = await supabase
+        .from("seller_profiles")
+        .select("id, shop_name, owner_name, is_disabled, status")
+        .eq("id", authData.user.id)
+        .single();
+
+      if (profileError || !profile) {
+        setError("Seller profile not found. Please contact support.");
+        await supabase.auth.signOut();
+        return;
+      }
+
+      // 3. Check if account is disabled
+      if (profile.is_disabled) {
+        setError(
+          "Your account has been disabled. Please contact KASUWA support for assistance."
+        );
+        await supabase.auth.signOut();
+        return;
+      }
+
+      // 4. Check if approved
+      if (profile.status !== "approved") {
+        setError(
+          "Your account is pending approval. You will receive an email once approved."
+        );
+        await supabase.auth.signOut();
+        return;
+      }
+
+      // 5. Success — store session info and redirect
+      document.cookie = `seller_session=${authData.session?.access_token}; path=/; max-age=86400; SameSite=Lax`;
+      document.cookie = `seller_shop=${encodeURIComponent(
+        profile.shop_name || ""
+      )}; path=/; max-age=86400; SameSite=Lax`;
+      document.cookie = `seller_name=${encodeURIComponent(
+        profile.owner_name || ""
+      )}; path=/; max-age=86400; SameSite=Lax`;
+
+      toast.success("Welcome back to KASUWA!");
+      router.push("/seller/dashboard");
+    } catch (err) {
+      setError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="night-market-bg min-h-screen flex items-center justify-center px-4">
-      <div className="lantern-glow lantern-glow-1" />
-      <div className="lantern-glow lantern-glow-2" />
+    <div className="night-market-bg min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Ember particles */}
+      <div className="ember-particle ember-particle-1" />
+      <div className="ember-particle ember-particle-2" />
+      <div className="ember-particle ember-particle-3" />
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
-      >
-        {/* Header */}
+      <div className="w-full max-w-md relative z-10">
+        {/* Logo */}
         <div className="text-center mb-8">
-          <div className="text-5xl mb-3">🏮</div>
-          <h1 className="text-2xl font-black text-[var(--text-lantern)] tracking-tight">KASUWA Seller</h1>
-          <p className="text-xs text-[var(--text-ash)] mt-1 uppercase tracking-widest">Seller Portal</p>
-          <div className="kente-stripe mt-4 mx-auto max-w-[120px]" />
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-[#FF9A3C] to-[#FFD166] mb-4">
+            <Store className="w-8 h-8 text-[#06080C]" />
+          </div>
+          <h1 className="text-3xl font-black text-[#FFE4A0] tracking-tight">
+            KASUWA
+          </h1>
+          <p className="text-sm text-[#7A6E62] uppercase tracking-[0.2em] mt-1">
+            Seller Portal
+          </p>
         </div>
 
         {/* Login Card */}
-        <div className="bg-[var(--night-surface)] border border-[var(--border-ember)] rounded-2xl p-6 backdrop-blur-xl">
-          <div className="flex items-center gap-2 mb-6">
-            <ShieldCheck className="size-5 text-[var(--ember-orange)]" />
-            <h2 className="text-sm font-bold text-[var(--text-lantern)] uppercase tracking-wider">Seller Sign In</h2>
-          </div>
+        <div className="bg-[rgba(20,26,34,0.75)] backdrop-blur-xl border border-[rgba(255,154,60,0.18)] rounded-2xl p-8">
+          <div className="kente-stripe mb-6 rounded-full" />
+
+          <h2 className="text-xl font-bold text-[#FFE4A0] mb-1">
+            Sign In to Your Shop
+          </h2>
+          <p className="text-sm text-[#7A6E62] mb-6">
+            Enter your credentials to manage your products
+          </p>
 
           {error && (
-            <div className="flex items-center gap-2 px-3 py-2.5 mb-4 rounded-lg bg-red-500/10 border border-red-500/20">
-              <AlertCircle className="size-4 text-red-400 flex-shrink-0" />
-              <span className="text-xs text-red-400">{error}</span>
+            <div className="flex items-start gap-3 p-4 bg-[rgba(224,64,64,0.1)] border border-[rgba(224,64,64,0.2)] rounded-xl mb-6">
+              <AlertCircle className="w-5 h-5 text-[#E04040] flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-[#E04040]">{error}</p>
             </div>
           )}
 
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-5">
             <div>
-              <label className="text-[10px] font-bold text-[var(--text-ash)] uppercase tracking-wider mb-1.5 block">Email</label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-[var(--text-ash)]" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="your@email.com"
-                  required
-                  className="auth-input w-full !pl-10"
-                />
-              </div>
+              <label className="block text-sm font-semibold text-[#FFB84D] mb-2">
+                Email Address
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="auth-input"
+                placeholder="your@email.com"
+                required
+                autoComplete="email"
+              />
             </div>
 
             <div>
-              <label className="text-[10px] font-bold text-[var(--text-ash)] uppercase tracking-wider mb-1.5 block">Password</label>
+              <label className="block text-sm font-semibold text-[#FFB84D] mb-2">
+                Password
+              </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-[var(--text-ash)]" />
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  className="auth-input pr-12"
                   placeholder="Enter your password"
                   required
-                  className="auth-input w-full !pl-10 !pr-10"
+                  autoComplete="current-password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-ash)] hover:text-[var(--ember-orange)] transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#7A6E62] hover:text-[#FFB84D] transition-colors"
                 >
-                  {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
                 </button>
               </div>
             </div>
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !email || !password}
               className="btn-ember w-full"
             >
-              {loading ? "Signing in..." : "Sign In"}
+              {loading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Signing in...
+                </>
+              ) : (
+                "Sign In"
+              )}
             </button>
           </form>
-        </div>
 
-        <div className="text-center mt-6 space-y-2">
-          <Link
-            href="/seller/register"
-            className="text-xs text-[var(--ember-orange)] hover:text-[var(--lantern-gold)] transition-colors"
-          >
-            Don&apos;t have an account? Register your shop
-          </Link>
-          <p className="text-[10px] text-[var(--text-shadow)]">
-            KASUWA 2.0 Seller Portal — The Market That Listens
+          <div className="kente-stripe mt-6 rounded-full" />
+
+          <p className="text-center text-xs text-[#7A6E62] mt-4">
+            Forgot your password? Contact{" "}
+            <a
+              href="mailto:support@kasuwa.ng"
+              className="text-[#FF9A3C] hover:underline"
+            >
+              support@kasuwa.ng
+            </a>
           </p>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

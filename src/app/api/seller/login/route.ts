@@ -1,5 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@/lib/supabase';
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 export async function POST(request: NextRequest) {
   try {
@@ -7,100 +10,72 @@ export async function POST(request: NextRequest) {
 
     if (!email || !password) {
       return NextResponse.json(
-        { error: 'Email and password are required.' },
+        { error: "Email and password are required" },
         { status: 400 }
       );
     }
 
-    const client = createServerClient();
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-    // Authenticate with Supabase Auth
-    const { data: authData, error: authError } = await client.auth.signInWithPassword({
-      email,
-      password,
-    });
+    // Authenticate
+    const { data: authData, error: authError } =
+      await supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
+        password,
+      });
 
-    if (authError) {
-      const msg = authError.message.toLowerCase();
-      if (msg.includes('invalid') || msg.includes('incorrect') || msg.includes('wrong')) {
-        return NextResponse.json(
-          { error: 'Invalid email or password.' },
-          { status: 401 }
-        );
-      }
-      if (msg.includes('email not confirmed')) {
-        return NextResponse.json(
-          { error: 'Please confirm your email before signing in.' },
-          { status: 403 }
-        );
-      }
-      return NextResponse.json({ error: authError.message }, { status: 400 });
+    if (authError || !authData.user) {
+      return NextResponse.json(
+        { error: "Invalid email or password" },
+        { status: 401 }
+      );
     }
 
-    // Fetch seller profile from seller_profiles table
-    const { data: sellerProfile, error: profileError } = await client
-      .from('seller_profiles')
-      .select('*')
-      .eq('email', email)
+    // Check seller profile
+    const { data: profile, error: profileError } = await supabase
+      .from("seller_profiles")
+      .select("id, shop_name, owner_name, is_disabled, status, default_password_set")
+      .eq("id", authData.user.id)
       .single();
 
-    if (profileError || !sellerProfile) {
+    if (profileError || !profile) {
       return NextResponse.json(
-        { error: 'Seller profile not found. Please register first.' },
+        { error: "Seller profile not found" },
         { status: 404 }
       );
     }
 
-    // Check if seller is approved
-    if (sellerProfile.status !== 'approved') {
-      if (sellerProfile.status === 'pending') {
-        return NextResponse.json(
-          { error: 'Your account is pending approval. Please wait for admin to review your KYB information.' },
-          { status: 403 }
-        );
-      }
-      if (sellerProfile.status === 'rejected') {
-        return NextResponse.json(
-          { error: 'Your seller application has been rejected. Please contact support for more information.' },
-          { status: 403 }
-        );
-      }
+    if (profile.is_disabled) {
       return NextResponse.json(
-        { error: 'Your account is not active. Please contact support.' },
+        { error: "Account has been disabled. Contact support." },
         { status: 403 }
       );
     }
 
-    // Check if seller is disabled by admin
-    if (sellerProfile.is_disabled) {
+    if (profile.status !== "approved") {
       return NextResponse.json(
-        { error: 'Your seller account has been disabled by the admin. Please contact support for assistance.' },
+        { error: "Account pending approval" },
         { status: 403 }
       );
     }
 
     return NextResponse.json({
-      seller: {
-        id: sellerProfile.id,
-        user_id: sellerProfile.user_id,
-        full_name: sellerProfile.full_name,
-        email: sellerProfile.email,
-        phone: sellerProfile.phone,
-        shop_name: sellerProfile.shop_name,
-        shop_address: sellerProfile.shop_address,
-        shop_type: sellerProfile.shop_type,
-        city: sellerProfile.city,
-        state: sellerProfile.state,
-        photo_url: sellerProfile.photo_url,
-        status: sellerProfile.status,
-        is_disabled: sellerProfile.is_disabled,
-        default_password_set: sellerProfile.default_password_set,
-        created_at: sellerProfile.created_at,
+      user: {
+        id: authData.user.id,
+        email: authData.user.email,
+      },
+      profile: {
+        shop_name: profile.shop_name,
+        owner_name: profile.owner_name,
+        default_password_set: profile.default_password_set,
       },
       session: authData.session,
     });
-  } catch (error) {
-    console.error('[Seller Login] Error:', error);
-    return NextResponse.json({ error: 'Internal server error.' }, { status: 500 });
+  } catch (err) {
+    console.error("Login API error:", err);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

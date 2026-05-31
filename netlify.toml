@@ -1,8 +1,5 @@
 [build]
   command = "npm run build"
-  # publish is intentionally not set here; @netlify/plugin-nextjs manages it.
-  # If the Netlify UI has publish = ".next", please clear it:
-  #   Site settings → Build & deploy → Build settings → Publish directory → clear/empty
 
 [build.environment]
   NODE_VERSION = "20"

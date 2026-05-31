@@ -26,23 +26,6 @@ export const metadata: Metadata = {
   title: "KASUWA Seller Portal — Manage Your Shop",
   description:
     "Seller portal for KASUWA 2.0 marketplace. Upload products, manage your shop, and connect with buyers across Nigeria.",
-  keywords: [
-    "KASUWA",
-    "Seller Portal",
-    "Nigerian Marketplace",
-    "Product Upload",
-    "Shop Management",
-    "Night Market",
-    "Nigeria",
-  ],
-  authors: [{ name: "KASUWA 2.0" }],
-  openGraph: {
-    title: "KASUWA Seller Portal",
-    description:
-      "Manage your shop on KASUWA 2.0 — the night market that listens. Upload products, track views, and grow your business.",
-    type: "website",
-    siteName: "KASUWA 2.0 Seller Portal",
-  },
 };
 
 export default function RootLayout({
